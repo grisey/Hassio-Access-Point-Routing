@@ -1,10 +1,10 @@
 ---
-name: Hass.io Access Point
-version: 0.5.4.5
+name: Hass.io Access Point Routing
+version: 0.5.4.5_1
 slug: hassio-access-point
-description: Create a WiFi access point to directly connect devices to Home Assistant
+description: Create a WiFi access point with optional routed client access to Home Assistant
 arch: [armhf, armv7, aarch64, amd64, i386]
-url: https://github.com/ex-ml/hassio-access-point
+url: https://github.com/grisey/Hassio-Access-Point-Routing
 startup: system
 boot: auto
 host_network: true
