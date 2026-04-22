@@ -212,6 +212,14 @@ is_forwarding_enabled() {
     iptables-nft -C FORWARD -i $INTERFACE -o $DEFAULT_ROUTE_INTERFACE -j ACCEPT -m comment --comment "ap-addon-inet" 2>/dev/null
 }
 
+is_routing_forward_enabled() {
+    iptables-nft -C FORWARD -i $INTERFACE -o $DEFAULT_ROUTE_INTERFACE -j ACCEPT -m comment --comment "ap-addon-route" 2>/dev/null
+}
+
+is_routing_reverse_enabled() {
+    iptables-nft -C FORWARD -i $DEFAULT_ROUTE_INTERFACE -o $INTERFACE -j ACCEPT -m comment --comment "ap-addon-route" 2>/dev/null
+}
+
 # Setup Client Internet Access
 if $(bashio::config.true "client_internet_access"); then
     ## Add masquerade if not already present
@@ -234,6 +242,25 @@ else
     if is_forwarding_enabled; then
         iptables-nft -D FORWARD -i $INTERFACE -o $DEFAULT_ROUTE_INTERFACE -j ACCEPT -m comment --comment "ap-addon-inet"
         iptables-nft -D FORWARD -i $DEFAULT_ROUTE_INTERFACE -o $INTERFACE -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT -m comment --comment "ap-addon-inet"
+    fi
+fi
+
+# Setup Client Routing Access (no NAT)
+if $(bashio::config.true "client_routing_access"); then
+    ## Allow forwarding in both directions if not already allowed
+    if ! is_routing_forward_enabled; then
+        iptables-nft -A FORWARD -i $INTERFACE -o $DEFAULT_ROUTE_INTERFACE -j ACCEPT -m comment --comment "ap-addon-route"
+    fi
+    if ! is_routing_reverse_enabled; then
+        iptables-nft -A FORWARD -i $DEFAULT_ROUTE_INTERFACE -o $INTERFACE -j ACCEPT -m comment --comment "ap-addon-route"
+    fi
+else
+    ## Remove routing forwarding if present
+    if is_routing_forward_enabled; then
+        iptables-nft -D FORWARD -i $INTERFACE -o $DEFAULT_ROUTE_INTERFACE -j ACCEPT -m comment --comment "ap-addon-route"
+    fi
+    if is_routing_reverse_enabled; then
+        iptables-nft -D FORWARD -i $DEFAULT_ROUTE_INTERFACE -o $INTERFACE -j ACCEPT -m comment --comment "ap-addon-route"
     fi
 fi
 
