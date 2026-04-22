@@ -1,8 +1,6 @@
 ARG BUILD_FROM="alpine"
 FROM $BUILD_FROM
 
-LABEL maintainer="ex-ml <ex_ml@sent.com>"
-
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ENV LANG C.UTF-8
